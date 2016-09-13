@@ -3,3 +3,21 @@
 #Megan Weller
 #message_format
 
+Fire:
+	Where the coordinates for 0-indexed
+	x=X&y=Y
+	
+	Ex: x=5&y=7
+
+Result:
+Correctly formatted fire request:
+	HTTP OK
+	hit = 1 (hit) or 0 (miss)
+	sink = (C, B, R, S, D)
+
+	Ex: HTTP OK hit=1&sink=D
+
+Errors:
+	Out of bounds for firing: HTTP Not Found
+	Already fired upon: HTTP Gone
+	Not formatted correctly: HTTP Bad Request
