@@ -2,6 +2,8 @@
 #Megan Weller, Ashley Bertrand
 #server.py
 
+#TCP implementation
+"""
 import socket
 import sys
 
@@ -32,3 +34,7 @@ while True:
 
 
 connection.close()
+"""
+
+#HTTP implementation
+import httplib
