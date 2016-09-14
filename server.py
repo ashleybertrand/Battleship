@@ -20,7 +20,7 @@ destroyer = 2
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = sys.argv[2]
-server_address = ('localhost', port)
+server_address = ('localhost', 5000)
 BUFFER_SIZE = 20
 print "starting up on %s port %s" % server_address
 sock.bind(server_address)
@@ -35,7 +35,7 @@ while True:
 	print "received ", data
 	if data:
 		print "sending data back to the client"
-		connection.send(data)
+		#connection.send(data)
 	else:
 		print "no more data from", client_address
 		break
