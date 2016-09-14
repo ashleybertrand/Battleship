@@ -32,13 +32,8 @@ connection, client_address = sock.accept()
 
 while True:
 	data = connection.recv(BUFFER_SIZE)
-	print "received ", data
-	if data:
-		print "sending data back to the client"
-		#connection.send(data)
-	else:
-		print "no more data from", client_address
-		break
+	print data
+	
 
 connection.close()
 
