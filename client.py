@@ -4,33 +4,48 @@
 #client.py
 
 import socket
-
 import httplib
 import urllib
+import sys
 
 
+# Create a HTTP connection
+params = urllib.urlencode({'@x': sys.argv[3], '@y': sys.argv[4]})
+headers = {"Content-type": "application/x-www-form-urlencoded", "Content-length": "7"}
+ip = sys.argv[1]
+port = sys.argv[2]
+conn = httplib.HTTPConnection(ip, port)
+conn.request("POST", "", params, headers)
+response = 	conn.getresponse()
+data = response.read()
+print data
+
+print "closing connection"
+conn.close()
 
 
-class Client:
-	def _init_(self, ip, port, x, y):
-		self.ip = ip
-		self.port = port
-		self.x = x
-		self.y = y
+'''
 
-	# Create a HTTP connection
-	params = urllib.urlencode({'@ip': ip, '@port': port})
-	headers = {"Content-type": "something I forgot", "?", "?"}
+#HTTP implementation
 
-	conn = httplib.HTTPConnection(ip, port)
-	conn.request("POST", "", params, header)
-	
-	print "connecting to %s port %s" %ip %port
+#works but is for GET not POST
+"""
+import httplib, urllib
+conn = httplib.HTTPSConnection("www.python.org")
+conn.request("GET", "/")
+r1 = conn.getresponse()
+print r1.status, r1.reason
+data1 = r1.read()
+conn.close()
+"""
 
-	def fire(self, x, y):
-		message = "x=%x&y=%y"
-
-
-
-	print "closing socket"
-	conn.close()
+import httplib, urllib
+params = urllib.urlencode({'spam': 1, 'eggs': 2, 'bacon': 0})
+headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+conn = httplib.HTTPConnection("musi-cal.mojam.com:80")
+conn.request("POST", "/cgi-bin/query", params, headers)
+response = conn.getresponse()
+print response.status, response.reason
+data = response.read()
+conn.close()
+'''
