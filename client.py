@@ -4,26 +4,33 @@
 #client.py
 
 import socket
-import sys
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Connect the socket to the port where the server is listening
-server_address = ('localhost', 5000)
-print "connecting to %s port %s" % server_address
-sock.connect(server_address)
+import httplib
+import urllib
 
 
-    # Send data
-message = "This is the message.  It will be repeated."
-print "sending ", message
-BUFFER_SIZE = 1024
-sock.send(message)
-data = sock.recv(BUFFER_SIZE)
-
-print "received data: ", data
 
 
-print "closing socket"
-sock.close()
+class Client:
+	def _init_(self, ip, port, x, y):
+		self.ip = ip
+		self.port = port
+		self.x = x
+		self.y = y
+
+	# Create a HTTP connection
+	params = urllib.urlencode({'@ip': ip, '@port': port})
+	headers = {"Content-type": "something I forgot", "?", "?"}
+
+	conn = httplib.HTTPConnection(ip, port)
+	conn.request("POST", "", params, header)
+	
+	print "connecting to %s port %s" %ip %port
+
+	def fire(self, x, y):
+		message = "x=%x&y=%y"
+
+
+
+	print "closing socket"
+	conn.close()
