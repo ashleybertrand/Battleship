@@ -2,9 +2,7 @@
 #Megan Weller, Ashley Bertrand
 #server.py
 
-
-#HTTP implementation
-import httplib, sys
+import sys
 import urllib
 import socket
 import re
@@ -31,8 +29,7 @@ def run():
 	print "waiting for a connection"
 
 	connection, client_address = sock.accept()
-	while True:
-		
+	while True:	
 		data = connection.recv(1024)
 		print data
 
@@ -43,16 +40,17 @@ def run():
 		y = coordinates[0]
 		x = coordinates[1]
 		print x, y
-
-		
-		evaluate(coordinates[1], coordinates[0])
+	
+		evaluate(x, y)
 		connection.send('HTTP/1.0 200 OK\r\n')
 		connection.send("Content-Type: text/html\n\n")
 		
 		break	
 
+
 	connection.close()
 	sock.close()
+
 
 def get_board():
 	#filename is last program argument (board.txt)
@@ -61,7 +59,6 @@ def get_board():
 	#make a list from board.txt
 	with open(filename) as file:
 		board = file.readlines()
-
 	return board
 
 
@@ -80,7 +77,7 @@ def evaluate(x, y):
 	if(value == "_"):
 		miss(x, y)
 	#already guessed that location
-	elif(value == "X"):
+	elif(value == "M" or value == "H"):
 		#HTTP Gone
 		print("repeat")
 	#hit
@@ -108,11 +105,36 @@ def evaluate(x, y):
 
 def miss(x, y):
 	print("miss")
+
 	#mark the spot as a miss
+	board = get_board()
+	row = list(board[y])	#row with miss
+	row[x] = "M"			#replacing "_" with "M"
+	row = ''.join(row)		#building string
+	board[y] = row 			#replacing row
+	
+	#writing "M" to board.txt
+	text_file = open(sys.argv[-1], "w")
+	for line in board:
+		text_file.write(line)
+	text_file.close()
 
 def hit(x, y, ship):
 	print("hit")
+	
 	#mark the spot as a hit
+	board = get_board()
+	row = list(board[y])	#row with hit
+	row[x] = "H"			#replacing "_" with "H"
+	row = ''.join(row)		#building string
+	board[y] = row 			#replacing row
+	
+	#writing "H" to board.txt
+	text_file = open(sys.argv[-1], "w")
+	for line in board:
+		text_file.write(line)
+	text_file.close()
+
 	check_for_sunk(ship)
 
 def check_for_sunk(ship):
@@ -130,4 +152,37 @@ def check_for_sunk(ship):
 if __name__=='__main__':
 	run()
 
+#testing
+"""
+#hits
+evaluate(2,1)
+evaluate(2,2)
+evaluate(7,0)
+evaluate(7,1)
+evaluate(7,2)
+evaluate(7,3)
+evaluate(9,4)
+evaluate(9,5)
+evaluate(9,6)
+evaluate(9,7)
+evaluate(9,8)
+evaluate(0,6)
+evaluate(1,6)
+evaluate(2,6)
+evaluate(6,9)
+evaluate(7,9)
+evaluate(8,9)
+
+#misses
+evaluate(0,5)
+evaluate(4,7)
+
+#invalid inputs
+evaluate(8,10)
+evaluate(-1,0)
+
+#repeats
+evaluate(7,0)
+evaluate(0,5)
+"""
 
