@@ -7,43 +7,52 @@
 import httplib, sys
 import urllib
 import socket
-import urlparse
+import re
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
 #when their value is 0, ship has been sunk
+
 carrier = 5
 battleship = 4
 cruiser = 3
 submarine = 3
 destroyer = 2
 
+def run():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	port = sys.argv[2]
+	server_address = ('localhost', 5000)
+	print "starting up on %s port %s" % server_address
+	sock.bind(server_address)
+	sock.listen(1)
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-port = sys.argv[2]
-server_address = ('localhost', 5000)
-print "starting up on %s port %s" % server_address
-sock.bind(server_address)
-sock.listen(1)
 
+	print "waiting for a connection"
 
-print "waiting for a connection"
+	connection, client_address = sock.accept()
+	while True:
+		
+		data = connection.recv(1024)
+		print data
 
-connection, client_address = sock.accept()
-while True:
-	
-	data = connection.recv(1024)
-	print data
-	
-	
-	connection.send('HTTP/1.0 200 OK\r\n')
-	connection.send("Content-Type: text/html\n\n")
-	
-	break	
+		regex = ur"\=(.+?)"
+		
+		coordinates = re.findall(regex, data)
 
-connection.close()
-sock.close()
+		y = coordinates[0]
+		x = coordinates[1]
+		print x, y
 
+		
+		evaluate(coordinates[1], coordinates[0])
+		connection.send('HTTP/1.0 200 OK\r\n')
+		connection.send("Content-Type: text/html\n\n")
+		
+		break	
+
+	connection.close()
+	sock.close()
 
 def get_board():
 	#filename is last program argument (board.txt)
@@ -55,6 +64,7 @@ def get_board():
 
 	return board
 
+
 def get_value_at_spot(x, y):
 	#valid input
 	if(x >= 0 and x < 10 and y >= 0 and y < 10):
@@ -62,7 +72,7 @@ def get_value_at_spot(x, y):
 		return (board[y][x])
 	#out of bounds
 	else:
-		print("out of bounds")
+		return
 
 def evaluate(x, y):
 	value = get_value_at_spot(x, y)
@@ -116,5 +126,8 @@ def check_for_sunk(ship):
 		print("Submarine is sunk")
 	elif(ship == "D" and destroyer == 0):
 		print("Destroyer is sunk")
+
+if __name__=='__main__':
+	run()
 
 
