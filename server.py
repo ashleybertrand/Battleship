@@ -2,42 +2,9 @@
 #Megan Weller, Ashley Bertrand
 #server.py
 
-#TCP implementation
-"""
+import sys
+import urllib
 import socket
-import sys
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server_address = ('localhost', 5000)
-BUFFER_SIZE = 20
-print "starting up on %s port %s" % server_address
-sock.bind(server_address)
-sock.listen(1)
-
-
-print "waiting for a connection"
-connection, client_address = sock.accept()
-
-
-print "connection from ", client_address
-
-while True:
-	data = connection.recv(BUFFER_SIZE)
-	print "received ", data
-	if data:
-		print "sending data back to the client"
-		connection.send(data)
-	else:
-		print "no more data from", client_address
-		break
-
-
-connection.close()
-"""
-
-#HTTP implementation
-import sys
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
@@ -47,6 +14,28 @@ battleship = 4
 cruiser = 3
 submarine = 3
 destroyer = 2
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+port = sys.argv[2]
+server_address = ('localhost', 5000)
+print("starting up on %s port %s" % server_address)
+sock.bind(server_address)
+sock.listen(1)
+
+print("waiting for a connection")
+
+connection, client_address = sock.accept()
+while True:
+	data = connection.recv(1024)
+	print(data)
+	
+	connection.send('HTTP/1.0 200 OK\r\n')
+	connection.send("Content-Type: text/html\n\n")
+	
+	break	
+
+connection.close()
+sock.close()
 
 def get_board():
 	#filename is last program argument (board.txt)
