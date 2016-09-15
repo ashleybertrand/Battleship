@@ -18,7 +18,7 @@ conn = httplib.HTTPConnection('localhost', port)
 conn.request("POST", "", params, headers)
 response = 	conn.getresponse()
 data = response.read()
-print data
+print response.status, response.reason
 
 print "closing connection"
 conn.close()

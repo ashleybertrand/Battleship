@@ -7,6 +7,7 @@
 import httplib, sys
 import urllib
 import socket
+import urlparse
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
@@ -21,21 +22,27 @@ destroyer = 2
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = sys.argv[2]
 server_address = ('localhost', 5000)
-BUFFER_SIZE = 20
 print "starting up on %s port %s" % server_address
 sock.bind(server_address)
 sock.listen(1)
 
 
 print "waiting for a connection"
-connection, client_address = sock.accept()
 
+connection, client_address = sock.accept()
 while True:
-	data = connection.recv(BUFFER_SIZE)
+	
+	data = connection.recv(1024)
 	print data
 	
+	
+	connection.send('HTTP/1.0 200 OK\r\n')
+	connection.send("Content-Type: text/html\n\n")
+	
+	break	
 
 connection.close()
+sock.close()
 
 
 def get_board():
