@@ -6,9 +6,7 @@
 import http.client
 import urllib.parse
 import urllib.request
-import http.server
 import sys
-import json
 
 # Create a HTTP connection
 params = urllib.parse.urlencode({'x': sys.argv[3], 'y': sys.argv[4]})

@@ -10,13 +10,12 @@ import urllib.request
 import webbrowser
 import os
 
-
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
 #when their value is 0, ship has been sunk
 
-ownMatrix = [['_' for i in range(10)] for i in range(10)]
-oppMatrix = [['_' for i in range(10)] for i in range(10)]
+matrixown = [['_' for i in range(10)] for i in range(10)]
+matrixopp = [['_' for i in range(10)] for i in range(10)]
 
 carrier = 5
 battleship = 4
@@ -29,7 +28,11 @@ def run():
 	port = sys.argv[2]
 	server_address = ('localhost', 5000)	
 	sock.bind(server_address)
-	
+	path = os.path.abspath('opponent_board.html')
+	webbrowser.open('file://'+path)
+
+	path2 = os.path.abspath('own_board.html')
+	webbrowser.open('file://'+path2)
 	while True:
 		sock.listen(1)
 		connection, client_address = sock.accept()
@@ -38,26 +41,20 @@ def run():
 		print (data)
 		
 		data_d = data.decode("utf-8")
-
-		print (data_d[1])
-		if data_d[1] == '/opponent_board.html':
-			path = os.path.abspath('opponent_board.html')
-			webbrowser.open('file://'+path)
-
 		coordinates = []
 		coordinates = re.findall(r'\=(.+?)', data_d)
 
 		if not data:
 			break
-		print (coordinates)
 		
 		x = int(coordinates[0])
 		y = int(coordinates[1])
 		
 		print (x, y)
 		response = evaluate(x, y)
-		print (response)
+
 		if len(response) == 3:
+			write_HTML(x,y)
 			req = response[0].encode('utf-8')
 			header = response[1].encode('utf-8')
 			msg = response[2].encode('utf-8')
@@ -199,26 +196,34 @@ def check_for_sunk(ship):
 		return "D"
 	return "E"
 
-def write_HTML():
-	oppMatrix = [ y for x in matrixopp for y in x]
-	oppMatrix = '_'.join(map(str,oppMatrix))
-	oppMatrix = oppMatrix.replace('_', 'X')
+def create_HTML():
 	file_op = open('opponent_board.html', 'w')
-	msg = """<html><head></head?><body><p>""" + oppMatrix + """</p></body></html>"""
+	msg = """<html><head></head?><body><p>""" + str(matrixopp) + """</p></body></html>"""
 	file_op.write(msg)
 	file_op.close()
 
-	ownMatrix = [ y for x in matrixown for y in x]
-	ownMatrix = '_'.join(map(str,ownMatrix))
-	ownMatrix = ownMatrix.replace('_' 'X')
 	file_own = open('own_board.html', 'w')
-	msg2 = """<html><head></head?><body><p>""" + ownMatrix + """</p></body></html>"""
+	msg2 = """<html><head></head?><body><p>""" + str(matrixown) + """</p></body></html>"""
+	file_own.write(msg2)
+	file_own.close()
+
+def write_HTML(x, y):
+	matrixopp[x][y] = 'X'
+	file_op = open('opponent_board.html', 'w')
+	msg = """<html><head></head?><body><p>""" + str(matrixopp)  + """</p></body></html>"""
+	file_op.write(msg)
+	file_op.close()
+
+	matrixown[x][y] = 'X'
+	file_own = open('own_board.html', 'w')
+	msg2 = """<html><head></head?><body><p>""" + str(matrixown) + """</p></body></html>"""
 	file_own.write(msg2)
 	file_own.close()
 
 
 
 if __name__=='__main__':
+	create_HTML()
 	run()
 
 #testing
