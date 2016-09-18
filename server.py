@@ -6,6 +6,10 @@ import sys
 import socket
 import re
 import urllib.parse
+import urllib.request
+import webbrowser
+import os
+
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
@@ -20,36 +24,44 @@ destroyer = 2
 def run():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	port = sys.argv[2]
-	server_address = ('localhost', 5000)
-	#print "starting up on %s port %s" % server_address
+	server_address = ('localhost', 5000)	
 	sock.bind(server_address)
-	sock.listen(1)
+	
+	while True:
+		sock.listen(1)
+		connection, client_address = sock.accept()
 
-
-	print ("waiting for a connection")
-
-	connection, client_address = sock.accept()
-	while True:	
-		data = connection.recv(1024)
+		data = connection.recv(2056)
 		print (data)
+		
+		data_d = data.decode("utf-8")
 
-
-		d = str(data,'utf-8')
 		coordinates = []
-		coordinates = re.findall(r'\=(.+?)', d)
+		coordinates = re.findall(r'\=(.+?)', data_d)
 
+		if not data:
+			break
+		print (coordinates)
+		
 		x = int(coordinates[0])
 		y = int(coordinates[1])
+		
 		print (x, y)
-	
-		reponse = evaluate(x, y)
-		
-		connection.send(reponse.encode())
-		
-		break	
+		response = evaluate(x, y)
+		print (response)
+		if len(response) == 2:
+			req = str.encode(response[0], 'utf-8')
+			params = str.encode(response[1], 'utf-8')
+			reponse = req + params
+			connection.send(req)
+			connection.send(params)
+		else:
+			connection.send(response.encode())
 
-	sock.close()
+
 	connection.close()
+	sock.close()
+
 
 def get_board():
 	#filename is last program argument (board.txt)
@@ -74,7 +86,8 @@ def evaluate(x, y):
 	value = get_value_at_spot(x, y)
 	#miss
 	if(value == "_"):
-		miss(x, y)
+		val = miss(x, y)
+		return val
 	#already guessed that location
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
@@ -85,26 +98,28 @@ def evaluate(x, y):
 		if(value == "C"):
 			global carrier
 			carrier = carrier - 1
-			return hit(x, y, "C")
+			val = hit(x, y, "C")
 		elif(value == "B"):
 			global battleship
 			battleship = battleship - 1
-			return hit(x, y, "B")
+			val = hit(x, y, "B")
 		elif(value == "R"):
 			global cruiser
 			cruiser = cruiser - 1
-			return hit(x, y, "R")
+			val = hit(x, y, "R")
 		elif(value == "S"):
 			global submarine
 			submarine = submarine - 1
-			return hit(x, y, "S")
+			val = hit(x, y, "S")
 		elif(value == "D"):
 			global destroyer
 			destroyer = destroyer - 1
-			return hit(x, y, "D")
+			val = hit(x, y, "D")
+		
+		return val
 
 def miss(x, y):
-	print("miss y")
+	print("miss")
 
 	#mark the spot as a miss
 	board = get_board()
@@ -120,9 +135,9 @@ def miss(x, y):
 	text_file.close()
 
 	params = urllib.parse.urlencode({'hit': 0})
-	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n').encode()
+	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n')
 	response = (header, params)
-
+	print (response)
 	return response
 
 def hit(x, y, ship):
@@ -141,15 +156,16 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 
-	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n').encode()
+	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n')
 	val = check_for_sunk(ship)
 	if (val != "E"):
 		params = urllib.parse.urlencode({'hit': 1})
 	else:
 		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
 
-	reponse = (header, params)
-	return reponse
+	response = (header, params)
+	print (response)
+	return response
 
 def check_for_sunk(ship):
 	if(ship == "C" and carrier == 0):

@@ -4,7 +4,9 @@
 #client.py
 
 import http.client
-import urllib
+import urllib.parse
+import urllib.request
+import http.server
 import sys
 
 
@@ -16,7 +18,8 @@ port = sys.argv[2]
 conn = http.client.HTTPConnection('localhost', port)
 conn.request("POST", "", params, headers)
 response = 	conn.getresponse()
-data = response.read()
+
+
 print (response.status, response.reason)
 
 print ("closing connection")
