@@ -57,18 +57,22 @@ def run():
 		print (x, y)
 		response = evaluate(x, y)
 		print (response)
-		if len(response) == 2:
+		if len(response) == 3:
 			req = response[0].encode('utf-8')
-			params = response[1].encode('utf-8')
-			response = req, params
-			data_send = urllib.parse.urlencode({'header': req, 'data': params})
+			header = response[1].encode('utf-8')
+			msg = response[2].encode('utf-8')
 			
-			connection.send(data_send.encode())
+			connection.send(req)
+			connection.send(header)
+			connection.send(msg)
+			
+			connection.close()
+
 		else:
 			connection.send(response.encode())
+			connection.close()
 
-
-	connection.close()
+	
 	sock.close()
 
 
@@ -89,7 +93,7 @@ def get_value_at_spot(x, y):
 		return (board[y][x])
 	#out of bounds
 	else:
-		return ('HTTP/1.1 404 BAD REQUEST\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
+		return ('HTTP/1.1 404 BAD REQUEST')
 
 def evaluate(x, y):
 	value = get_value_at_spot(x, y)
@@ -101,7 +105,7 @@ def evaluate(x, y):
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
 		print("miss")
-		return ('HTTP/1.1 400 GONE\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
+		return ('HTTP/1.1 400 GONE')
 	#hit
 	else:
 		if(value == "C"):
@@ -144,9 +148,9 @@ def miss(x, y):
 	text_file.close()
 
 	params = urllib.parse.urlencode({'hit': 0})
-	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
-	response = (header, params)
-	print (response)
+	re = ('HTTP/1.1 200 OK')
+	header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 5\n\n')
+	response = (re, header, params)
 	return response
 
 def hit(x, y, ship):
@@ -165,15 +169,16 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 
-	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
+	re = ('HTTP/1.1 200 OK')
 	val = check_for_sunk(ship)
 	if (val == "E"):
+		header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 5\n\n')
 		params = urllib.parse.urlencode({'hit': 1})
 	else:
+		header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 12\n\n')
 		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
 
-	response = (header, params)
-	print (response)
+	response = (re, header, params)
 	return response
 
 def check_for_sunk(ship):

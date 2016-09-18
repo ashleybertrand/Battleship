@@ -20,7 +20,7 @@ conn.request("POST", "", params, headers)
 response = 	conn.getresponse()
 print (response.reason, response.status, response.getheaders())
 
-print(response.read(1))
+print(response.read())
 
 print ("closing connection")
 conn.close()
