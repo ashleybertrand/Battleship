@@ -15,6 +15,9 @@ import os
 #each time a ship is hit, their value will be subtracted from
 #when their value is 0, ship has been sunk
 
+ownMatrix = [['_' for i in range(10)] for i in range(10)]
+oppMatrix = [['_' for i in range(10)] for i in range(10)]
+
 carrier = 5
 battleship = 4
 cruiser = 3
@@ -36,6 +39,11 @@ def run():
 		
 		data_d = data.decode("utf-8")
 
+		print (data_d[1])
+		if data_d[1] == '/opponent_board.html':
+			path = os.path.abspath('opponent_board.html')
+			webbrowser.open('file://'+path)
+
 		coordinates = []
 		coordinates = re.findall(r'\=(.+?)', data_d)
 
@@ -50,11 +58,12 @@ def run():
 		response = evaluate(x, y)
 		print (response)
 		if len(response) == 2:
-			req = str.encode(response[0], 'utf-8')
-			params = str.encode(response[1], 'utf-8')
-			reponse = req + params
-			connection.send(req)
-			connection.send(params)
+			req = response[0].encode('utf-8')
+			params = response[1].encode('utf-8')
+			response = req, params
+			data_send = urllib.parse.urlencode({'header': req, 'data': params})
+			
+			connection.send(data_send.encode())
 		else:
 			connection.send(response.encode())
 
@@ -80,7 +89,7 @@ def get_value_at_spot(x, y):
 		return (board[y][x])
 	#out of bounds
 	else:
-		return ('HTTP/1.1 404 BAD REQUEST\nContent-Type: text/html\n\n')
+		return ('HTTP/1.1 404 BAD REQUEST\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
 
 def evaluate(x, y):
 	value = get_value_at_spot(x, y)
@@ -92,7 +101,7 @@ def evaluate(x, y):
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
 		print("miss")
-		return ('HTTP/1.1 400 GONE\nContent-Type: text/html\n\n')
+		return ('HTTP/1.1 400 GONE\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
 	#hit
 	else:
 		if(value == "C"):
@@ -135,7 +144,7 @@ def miss(x, y):
 	text_file.close()
 
 	params = urllib.parse.urlencode({'hit': 0})
-	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n')
+	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
 	response = (header, params)
 	print (response)
 	return response
@@ -156,9 +165,9 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 
-	header = ('HTTP/1.1 200 OK\nContent-Type: text/html\n\n')
+	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
 	val = check_for_sunk(ship)
-	if (val != "E"):
+	if (val == "E"):
 		params = urllib.parse.urlencode({'hit': 1})
 	else:
 		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
@@ -184,6 +193,25 @@ def check_for_sunk(ship):
 		print("Destroyer is sunk")
 		return "D"
 	return "E"
+
+def write_HTML():
+	oppMatrix = [ y for x in matrixopp for y in x]
+	oppMatrix = '_'.join(map(str,oppMatrix))
+	oppMatrix = oppMatrix.replace('_', 'X')
+	file_op = open('opponent_board.html', 'w')
+	msg = """<html><head></head?><body><p>""" + oppMatrix + """</p></body></html>"""
+	file_op.write(msg)
+	file_op.close()
+
+	ownMatrix = [ y for x in matrixown for y in x]
+	ownMatrix = '_'.join(map(str,ownMatrix))
+	ownMatrix = ownMatrix.replace('_' 'X')
+	file_own = open('own_board.html', 'w')
+	msg2 = """<html><head></head?><body><p>""" + ownMatrix + """</p></body></html>"""
+	file_own.write(msg2)
+	file_own.close()
+
+
 
 if __name__=='__main__':
 	run()
