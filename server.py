@@ -3,13 +3,20 @@
 #server.py
 
 import sys
-import urllib
 import socket
 import re
+import urllib.parse
+import urllib.request
+import webbrowser
+import os
+
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
 #when their value is 0, ship has been sunk
+
+ownMatrix = [['_' for i in range(10)] for i in range(10)]
+oppMatrix = [['_' for i in range(10)] for i in range(10)]
 
 carrier = 5
 battleship = 4
@@ -20,32 +27,45 @@ destroyer = 2
 def run():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	port = sys.argv[2]
-	server_address = ('localhost', 5000)
-	print "starting up on %s port %s" % server_address
+	server_address = ('localhost', 5000)	
 	sock.bind(server_address)
-	sock.listen(1)
-
-
-	print "waiting for a connection"
-
-	connection, client_address = sock.accept()
-	while True:	
-		data = connection.recv(1024)
-		print data
-
-		regex = ur"\=(.+?)"
-		
-		coordinates = re.findall(regex, data)
-
-		y = coordinates[0]
-		x = coordinates[1]
-		print x, y
 	
-		evaluate(x, y)
-		connection.send('HTTP/1.0 200 OK\r\n')
-		connection.send("Content-Type: text/html\n\n")
+	while True:
+		sock.listen(1)
+		connection, client_address = sock.accept()
+
+		data = connection.recv(2056)
+		print (data)
 		
-		break	
+		data_d = data.decode("utf-8")
+
+		print (data_d[1])
+		if data_d[1] == '/opponent_board.html':
+			path = os.path.abspath('opponent_board.html')
+			webbrowser.open('file://'+path)
+
+		coordinates = []
+		coordinates = re.findall(r'\=(.+?)', data_d)
+
+		if not data:
+			break
+		print (coordinates)
+		
+		x = int(coordinates[0])
+		y = int(coordinates[1])
+		
+		print (x, y)
+		response = evaluate(x, y)
+		print (response)
+		if len(response) == 2:
+			req = response[0].encode('utf-8')
+			params = response[1].encode('utf-8')
+			response = req, params
+			data_send = urllib.parse.urlencode({'header': req, 'data': params})
+			
+			connection.send(data_send.encode())
+		else:
+			connection.send(response.encode())
 
 
 	connection.close()
@@ -69,39 +89,43 @@ def get_value_at_spot(x, y):
 		return (board[y][x])
 	#out of bounds
 	else:
-		return
+		return ('HTTP/1.1 404 BAD REQUEST\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
 
 def evaluate(x, y):
 	value = get_value_at_spot(x, y)
 	#miss
 	if(value == "_"):
-		miss(x, y)
+		val = miss(x, y)
+		return val
 	#already guessed that location
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
-		print("repeat")
+		print("miss")
+		return ('HTTP/1.1 400 GONE\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n\n')
 	#hit
 	else:
 		if(value == "C"):
 			global carrier
 			carrier = carrier - 1
-			hit(x, y, "C")
+			val = hit(x, y, "C")
 		elif(value == "B"):
 			global battleship
 			battleship = battleship - 1
-			hit(x, y, "B")
+			val = hit(x, y, "B")
 		elif(value == "R"):
 			global cruiser
 			cruiser = cruiser - 1
-			hit(x, y, "R")
+			val = hit(x, y, "R")
 		elif(value == "S"):
 			global submarine
 			submarine = submarine - 1
-			hit(x, y, "S")
+			val = hit(x, y, "S")
 		elif(value == "D"):
 			global destroyer
 			destroyer = destroyer - 1
-			hit(x, y, "D")
+			val = hit(x, y, "D")
+		
+		return val
 
 def miss(x, y):
 	print("miss")
@@ -119,6 +143,12 @@ def miss(x, y):
 		text_file.write(line)
 	text_file.close()
 
+	params = urllib.parse.urlencode({'hit': 0})
+	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
+	response = (header, params)
+	print (response)
+	return response
+
 def hit(x, y, ship):
 	print("hit")
 	
@@ -135,19 +165,53 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 
-	check_for_sunk(ship)
+	header = ('HTTP/1.1 200 OK\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 7\n\n')
+	val = check_for_sunk(ship)
+	if (val == "E"):
+		params = urllib.parse.urlencode({'hit': 1})
+	else:
+		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
+
+	response = (header, params)
+	print (response)
+	return response
 
 def check_for_sunk(ship):
 	if(ship == "C" and carrier == 0):
 		print("Carrier is sunk")
+		return "C"
 	elif(ship == "B" and battleship == 0):
 		print("Battleship is sunk")
+		return "B"
 	elif(ship == "R" and cruiser == 0):
 		print("Cruiser is sunk")
+		return "R"
 	elif(ship == "S" and submarine == 0):
 		print("Submarine is sunk")
+		return "S"
 	elif(ship == "D" and destroyer == 0):
 		print("Destroyer is sunk")
+		return "D"
+	return "E"
+
+def write_HTML():
+	oppMatrix = [ y for x in matrixopp for y in x]
+	oppMatrix = '_'.join(map(str,oppMatrix))
+	oppMatrix = oppMatrix.replace('_', 'X')
+	file_op = open('opponent_board.html', 'w')
+	msg = """<html><head></head?><body><p>""" + oppMatrix + """</p></body></html>"""
+	file_op.write(msg)
+	file_op.close()
+
+	ownMatrix = [ y for x in matrixown for y in x]
+	ownMatrix = '_'.join(map(str,ownMatrix))
+	ownMatrix = ownMatrix.replace('_' 'X')
+	file_own = open('own_board.html', 'w')
+	msg2 = """<html><head></head?><body><p>""" + ownMatrix + """</p></body></html>"""
+	file_own.write(msg2)
+	file_own.close()
+
+
 
 if __name__=='__main__':
 	run()
