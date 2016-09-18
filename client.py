@@ -19,7 +19,8 @@ conn = http.client.HTTPConnection('localhost', port)
 conn.request("POST", "", params, headers)
 response = 	conn.getresponse()
 print (response.reason, response.status, response.getheaders())
-data = response.read()
+
+print(response.read(1))
 
 print ("closing connection")
 conn.close()
