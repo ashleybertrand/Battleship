@@ -14,8 +14,8 @@ import os
 #each time a ship is hit, their value will be subtracted from
 #when their value is 0, ship has been sunk
 
-matrixown = [['_' for i in range(10)] for i in range(10)]
 matrixopp = [['_' for i in range(10)] for i in range(10)]
+matrixown = [['_' for i in range(10)] for i in range(10)]
 
 carrier = 5
 battleship = 4
@@ -42,15 +42,13 @@ def run():
 		
 		data_d = data.decode("utf-8")
 		coordinates = []
-		coordinates = re.findall(r'\=(.+?)', data_d)
-
+		xlist = re.findall('x=(.?)', data_d)
+		ylist = re.findall('y=(.?)', data_d)
 		if not data:
 			break
 		
-		x = int(coordinates[0])
-		y = int(coordinates[1])
-		
-		print (x, y)
+		x = int(xlist[0]) 
+		y = int(ylist[0])
 		response = evaluate(x, y)
 
 		if len(response) == 3:
@@ -81,7 +79,6 @@ def get_board():
 	with open(filename) as file:
 		board = file.readlines()
 	return board
-
 
 def get_value_at_spot(x, y):
 	#valid input
@@ -203,7 +200,13 @@ def create_HTML():
 	file_op.close()
 
 	file_own = open('own_board.html', 'w')
-	msg2 = """<html><head></head?><body><p>""" + str(matrixown) + """</p></body></html>"""
+	filename = sys.argv[-1]
+
+	#make a list from board.txt
+	with open(filename) as file:
+		matrixown = file.readlines()
+
+	msg2 = """<html><head></head?><body><tr><td>""" + str(matrixown) + """<td></tr></p></body></html>"""
 	file_own.write(msg2)
 	file_own.close()
 
