@@ -12,6 +12,8 @@ import json
 
 # Create a HTTP connection
 params = urllib.parse.urlencode({'x': sys.argv[3], 'y': sys.argv[4]})
+print("ARGUMENT 3 is ", sys.argv[3])
+print("ARGUMENT 4 is ", sys.argv[4])
 headers = {"Content-type": "application/x-www-form-urlencoded", "Content-length": "7"}
 ip = sys.argv[1]
 port = sys.argv[2]

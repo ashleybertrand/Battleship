@@ -53,6 +53,9 @@ def run():
 		
 		x = int(coordinates[0])
 		y = int(coordinates[1])
+
+		print("x = ", x)
+		print("y = ", y)
 		
 		print (x, y)
 		response = evaluate(x, y)
@@ -220,38 +223,3 @@ def write_HTML():
 
 if __name__=='__main__':
 	run()
-
-#testing
-"""
-#hits
-evaluate(2,1)
-evaluate(2,2)
-evaluate(7,0)
-evaluate(7,1)
-evaluate(7,2)
-evaluate(7,3)
-evaluate(9,4)
-evaluate(9,5)
-evaluate(9,6)
-evaluate(9,7)
-evaluate(9,8)
-evaluate(0,6)
-evaluate(1,6)
-evaluate(2,6)
-evaluate(6,9)
-evaluate(7,9)
-evaluate(8,9)
-
-#misses
-evaluate(0,5)
-evaluate(4,7)
-
-#invalid inputs
-evaluate(8,10)
-evaluate(-1,0)
-
-#repeats
-evaluate(7,0)
-evaluate(0,5)
-"""
-
