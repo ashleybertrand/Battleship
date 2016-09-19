@@ -166,8 +166,6 @@ def hit(x, y, ship):
 	else:
 		header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 12\n\n')
 		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
-		#params = params[:-12]
-		#params = params + "hit=1&sink=" + val + "\n\n"
 
 	response = (re + header + params)
 	return response

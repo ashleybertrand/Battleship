@@ -26,6 +26,14 @@ def run():
 	headers = '\n'.join(': '.join(elems) for elems in response.getheaders())
 	read = response.read().decode("utf-8")
 
+	if(len(read) == 12):
+		read = read.split("&")
+		if(len(read[0]) > len(read[1])):
+			ship = read[0][-1:]
+		else:
+			ship = read[1][-1:]
+		read = "hit=1&sink=" + ship
+
 	print("HTTP/1.1 " + response.reason + "\n" + headers + "\n\n" + read + "\n\n")
 	conn.close()	
 
