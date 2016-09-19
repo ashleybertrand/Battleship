@@ -10,13 +10,12 @@ import urllib.request
 import webbrowser
 import os
 
-#used as global variables to determine if a ship has been sunk
-#each time a ship is hit, their value will be subtracted from
-#when their value is 0, ship has been sunk
-
 matrixopp = [['_' for i in range(10)] for i in range(10)]
 matrixown = [['_' for i in range(10)] for i in range(10)]
 
+#used as global variables to determine if a ship has been sunk
+#each time a ship is hit, their value will be subtracted from
+#when their value is 0, ship has been sunk
 carrier = 5
 battleship = 4
 cruiser = 3
@@ -38,17 +37,23 @@ def run():
 		connection, client_address = sock.accept()
 
 		data = connection.recv(2056)
-		print (data)
+		data_string = data.decode("utf-8")
 		
-		data_d = data.decode("utf-8")
 		coordinates = []
-		xlist = re.findall('x=(.?)', data_d)
-		ylist = re.findall('y=(.?)', data_d)
+		xlist = re.findall('x=(.?)', data_string)
+		ylist = re.findall('y=(.?)', data_string)
+
 		if not data:
 			break
 		
 		x = int(xlist[0]) 
 		y = int(ylist[0])
+
+		data_string = data_string[:-7]
+		data_string = data_string + "x=" + str(x) + "&y=" + str(y)
+
+		print(data_string)
+
 		response = evaluate(x, y)
 
 		if len(response) == 3:
@@ -61,16 +66,13 @@ def run():
 			connection.send(req)
 			connection.send(header)
 			connection.send(msg)
-			
 			connection.close()
 
 		else:
 			connection.send(response.encode())
 			connection.close()
 
-	
 	sock.close()
-
 
 def get_board():
 	#filename is last program argument (board.txt)
@@ -99,7 +101,6 @@ def evaluate(x, y):
 	#already guessed that location
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
-		print("miss")
 		return ('HTTP/1.1 400 GONE')
 	#hit
 	else:
@@ -127,8 +128,6 @@ def evaluate(x, y):
 		return val
 
 def miss(x, y):
-	print("miss")
-
 	#mark the spot as a miss
 	board = get_board()
 	row = list(board[y])	#row with miss
@@ -149,8 +148,6 @@ def miss(x, y):
 	return response
 
 def hit(x, y, ship):
-	print("hit")
-	
 	#mark the spot as a hit
 	board = get_board()
 	row = list(board[y])	#row with hit
@@ -224,43 +221,6 @@ def write_HTML(x, y):
 	file_own.write(msg2)
 	file_own.close()
 
-
-
 if __name__=='__main__':
 	create_HTML()
 	run()
-
-#testing
-"""
-#hits
-evaluate(2,1)
-evaluate(2,2)
-evaluate(7,0)
-evaluate(7,1)
-evaluate(7,2)
-evaluate(7,3)
-evaluate(9,4)
-evaluate(9,5)
-evaluate(9,6)
-evaluate(9,7)
-evaluate(9,8)
-evaluate(0,6)
-evaluate(1,6)
-evaluate(2,6)
-evaluate(6,9)
-evaluate(7,9)
-evaluate(8,9)
-
-#misses
-evaluate(0,5)
-evaluate(4,7)
-
-#invalid inputs
-evaluate(8,10)
-evaluate(-1,0)
-
-#repeats
-evaluate(7,0)
-evaluate(0,5)
-"""
-
