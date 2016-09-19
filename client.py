@@ -15,10 +15,11 @@ ip = sys.argv[1]
 port = sys.argv[2]
 conn = http.client.HTTPConnection('localhost', port)
 conn.request("POST", "", params, headers)
+
 response = 	conn.getresponse()
-print (response.reason, response.status, response.getheaders())
+headers = '\n'.join(': '.join(elems) for elems in response.getheaders())
+read = response.read().decode("utf-8")
 
-print(response.read())
+print("HTTP/1.1 " + response.reason + "\n" + headers + "\n\n" + read + "\n\n")
 
-print ("closing connection")
 conn.close()
