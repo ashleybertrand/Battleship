@@ -7,6 +7,7 @@ import http.client
 import urllib.parse
 import urllib.request
 import sys
+import re
 import webbrowser
 import os
 
@@ -38,10 +39,28 @@ def run():
 	conn.close()	
 
 def write_HTML(x,y):
-	matrixopp[x][y] = 'X'	
+
+	with open('opponent_board.html') as file:
+		lines = []
+		for line in file:
+			lines.append(line.strip())
+		
+	newStr = line.replace("<html><head></head><body><p>", "")
+	
+	matrix = newStr.replace("</p></body></html>", "")
+
+	xnew = x*50
+	ynew = (3+(2*x))+(y*5)
+	coor = xnew + ynew
+
+	row = list(matrix)
+	
+	row[coor] = 'X'
+	matrix= ''.join(row)
+	
 
 	file_op = open('opponent_board.html', 'w')
-	msg = """<html><head></head><body><p>""" + str(matrixopp) + """</p></body></html>"""
+	msg = """<html><head></head><body><p>""" + matrix + """</p></body></html>"""
 	file_op.write(msg)
 	file_op.close()
 
