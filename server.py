@@ -52,6 +52,7 @@ def run():
 		response = evaluate(x, y)
 
 		if len(response) == 3:
+			print (x,y)
 			write_HTML(x,y)
 			req = response[0].encode('utf-8')
 			header = response[1].encode('utf-8')
@@ -202,9 +203,9 @@ def create_HTML():
 	file_own = open('own_board.html', 'w')
 	filename = sys.argv[-1]
 
-	#make a list from board.txt
-	with open(filename) as file:
-		matrixown = file.readlines()
+	global matrixown
+	board = get_board()
+	matrixown = [list(line) for line in board]
 
 	msg2 = """<html><head></head?><body><tr><td>""" + str(matrixown) + """<td></tr></p></body></html>"""
 	file_own.write(msg2)
@@ -213,7 +214,7 @@ def create_HTML():
 def write_HTML(x, y):
 	matrixopp[x][y] = 'X'
 	file_op = open('opponent_board.html', 'w')
-	msg = """<html><head></head?><body><p>""" + str(matrixopp)  + """</p></body></html>"""
+	msg = """<html><head></head?><body><p>""" + str(matrixopp) + """</p></body></html>"""
 	file_op.write(msg)
 	file_op.close()
 
