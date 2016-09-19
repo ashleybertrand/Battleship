@@ -40,7 +40,6 @@ def run():
 		data = connection.recv(2056)
 		data_string = data.decode("utf-8")
 		
-		coordinates = []
 		xlist = re.findall('x=(.?)', data_string)
 		ylist = re.findall('y=(.?)', data_string)
 
@@ -51,7 +50,7 @@ def run():
 		y = int(ylist[0])
 
 		data_string = data_string[:-7]
-		data_string = data_string + "x=" + str(x) + "&y=" + str(y)
+		data_string = data_string + "x=" + str(x) + "&y=" + str(y) + "\n\n"
 
 		response = evaluate(x, y)
 
@@ -159,7 +158,7 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 
-	re = ('HTTP/1.1 200 OK')
+	re = ('HTTP/1.1 200 OK\n')
 	val = check_for_sunk(ship)
 	if (val == "E"):
 		header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 5\n\n')
@@ -167,25 +166,22 @@ def hit(x, y, ship):
 	else:
 		header = ('Content-Type: application/x-www-form-urlencoded\nContent-Length: 12\n\n')
 		params = urllib.parse.urlencode({'hit': 1, 'sink': val})
+		#params = params[:-12]
+		#params = params + "hit=1&sink=" + val + "\n\n"
 
-	response = (re, header, params)
+	response = (re + header + params)
 	return response
 
 def check_for_sunk(ship):
 	if(ship == "C" and carrier == 0):
-		print("Carrier is sunk")
 		return "C"
 	elif(ship == "B" and battleship == 0):
-		print("Battleship is sunk")
 		return "B"
 	elif(ship == "R" and cruiser == 0):
-		print("Cruiser is sunk")
 		return "R"
 	elif(ship == "S" and submarine == 0):
-		print("Submarine is sunk")
 		return "S"
 	elif(ship == "D" and destroyer == 0):
-		print("Destroyer is sunk")
 		return "D"
 	return "E"
 
