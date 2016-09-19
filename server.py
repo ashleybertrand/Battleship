@@ -10,8 +10,8 @@ import urllib.request
 import webbrowser
 import os
 
-matrixopp = [['_' for i in range(10)] for i in range(10)]
 matrixown = [['_' for i in range(10)] for i in range(10)]
+matrixopp = [['_' for i in range(10)] for i in range(10)]
 
 #used as global variables to determine if a ship has been sunk
 #each time a ship is hit, their value will be subtracted from
@@ -27,11 +27,12 @@ def run():
 	port = sys.argv[2]
 	server_address = ('localhost', 5000)	
 	sock.bind(server_address)
+	
 	path = os.path.abspath('opponent_board.html')
 	webbrowser.open('file://'+path)
 
-	path2 = os.path.abspath('own_board.html')
-	webbrowser.open('file://'+path2)
+	path1 = os.path.abspath('own_board.html')
+	webbrowser.open('file://'+path1)
 	while True:
 		sock.listen(1)
 		connection, client_address = sock.accept()
@@ -52,12 +53,9 @@ def run():
 		data_string = data_string[:-7]
 		data_string = data_string + "x=" + str(x) + "&y=" + str(y)
 
-		print(data_string)
-
 		response = evaluate(x, y)
 
 		if len(response) == 3:
-			print (x,y)
 			write_HTML(x,y)
 			req = response[0].encode('utf-8')
 			header = response[1].encode('utf-8')
@@ -193,7 +191,7 @@ def check_for_sunk(ship):
 
 def create_HTML():
 	file_op = open('opponent_board.html', 'w')
-	msg = """<html><head></head?><body><p>""" + str(matrixopp) + """</p></body></html>"""
+	msg = """<html><head></head><body><p>""" + str(matrixopp) + """</p></body></html>"""
 	file_op.write(msg)
 	file_op.close()
 
@@ -204,20 +202,14 @@ def create_HTML():
 	board = get_board()
 	matrixown = [list(line) for line in board]
 
-	msg2 = """<html><head></head?><body><tr><td>""" + str(matrixown) + """<td></tr></p></body></html>"""
+	msg2 = """<html><head></head><body><tr>""" + str(matrixown) + """</tr></body></html>"""
 	file_own.write(msg2)
 	file_own.close()
 
 def write_HTML(x, y):
-	matrixopp[x][y] = 'X'
-	file_op = open('opponent_board.html', 'w')
-	msg = """<html><head></head?><body><p>""" + str(matrixopp) + """</p></body></html>"""
-	file_op.write(msg)
-	file_op.close()
-
 	matrixown[x][y] = 'X'
 	file_own = open('own_board.html', 'w')
-	msg2 = """<html><head></head?><body><p>""" + str(matrixown) + """</p></body></html>"""
+	msg2 = """<html><head></head><body><p>""" + str(matrixown) + """</p></body></html>"""
 	file_own.write(msg2)
 	file_own.close()
 
