@@ -132,19 +132,19 @@ def evaluate(x, y):
 
 def miss(x, y):
 	#mark the spot as a miss
-	'''
+	
 	board = get_board()
 	row = list(board[y])	#row with miss
 	row[x] = "M"			#replacing "_" with "M"
 	row = ''.join(row)		#building string
 	board[y] = row 			#replacing row
 	
-	writing "M" to board.txt
+	#writing "M" to board.txt
 	text_file = open(sys.argv[-1], "w")
 	for line in board:
 		text_file.write(line)
 	text_file.close()
-	'''
+	
 
 	params = urllib.parse.urlencode({'hit': 0})
 	re = '200'
@@ -155,7 +155,7 @@ def miss(x, y):
 
 def hit(x, y, ship):
 	#mark the spot as a hit
-	'''
+	
 	board = get_board()
 	row = list(board[y])	#row with hit
 	row[x] = "H"			#replacing "_" with "H"
@@ -167,7 +167,7 @@ def hit(x, y, ship):
 	for line in board:
 		text_file.write(line)
 	text_file.close()
-	'''
+	
 
 	re = '200'
 	val = check_for_sunk(ship) 
@@ -222,8 +222,8 @@ def create_HTML(matrix):
 	return table
 
 def write_HTML(x, y):
-	matrixown[x][y] = 'X'
-	matrixopp[x][y] = 'X'
+	matrixown[y][x] = 'X'
+	matrixopp[y][x] = 'X'
 	
 if __name__=='__main__':
 	create_own()
