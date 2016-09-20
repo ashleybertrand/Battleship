@@ -40,15 +40,15 @@ class MyHandler(BaseHTTPRequestHandler):
 	def do_POST(s):
 		content_length = int(s.headers['Content-Length'])
 		post_data = s.rfile.read(content_length)
-		data_string = post_data.decode("utf-8")
+		
+		data_string = post_data.decode('utf-8')
 		xlist = re.findall('x=(.?)', data_string)
 		ylist = re.findall('y=(.?)', data_string)
-
-		x = int(xlist[0]) 
-		y = int(ylist[0])
-
-		response = evaluate(x, y)
 		
+		x = int(xlist[0])
+		y = int(ylist[0])
+		response = evaluate(x, y)
+
 		if response[0] == '200':
 			write_HTML(x,y)
 			
@@ -63,20 +63,23 @@ class MyHandler(BaseHTTPRequestHandler):
 			s.end_headers()
 			s.wfile.write(msg)
 
+		elif response[0] == '410':
+			s.send_response(410)
+			s.end_headers()
+
+		elif response[0] == '404':
+			s.send_response(404)
+			s.end_headers()
+
 		else:
-			s.send_error(int(response))
+			s.send_error(400)
 
 def run():
 	port = int(sys.argv[1])
 	
 	server = HTTPServer(('localhost', port), MyHandler)
-
-	try:
-		server.serve_forever()
-	except KeyboardInterrupt:
-		pass
-	server.server.close()
-
+	server.serve_forever()
+	
 def get_board():
 	#filename is last program argument (board.txt)
 	filename = sys.argv[-1]
@@ -104,7 +107,7 @@ def evaluate(x, y):
 	#already guessed that location
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
-		return '400'
+		return '410'
 	#hit
 	else:
 		if(value == "C"):
@@ -144,7 +147,6 @@ def miss(x, y):
 	for line in board:
 		text_file.write(line)
 	text_file.close()
-	
 
 	params = urllib.parse.urlencode({'hit': 0})
 	re = '200'
@@ -167,7 +169,6 @@ def hit(x, y, ship):
 	for line in board:
 		text_file.write(line)
 	text_file.close()
-	
 
 	re = '200'
 	val = check_for_sunk(ship) 
