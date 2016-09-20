@@ -4,8 +4,7 @@
 #message_format
 
 Fire:
-	HTTP POST
-	Where the coordinates are 0-indexed
+	HTTP POST where coordinates are 0-indexed:
 	x=X&y=Y
 	
 	Ex: 
@@ -20,19 +19,36 @@ Fire:
 -----------------------------------------------------------------------
 Result:
 Correctly formatted fire request:
-	HTTP OK
+	HTTP OK displaying hits, misses, and sinks:
 	hit = 1 (hit) or 0 (miss)
 	sink = (C, B, R, S, D)
 
 	Ex: 
 	HTTP/1.1 OK 
+	Server: BaseHTTP/0.6 Python/3.5.2
+	Date: Tue, 20 Sep 2016 02:50:17 GMT
 	Content-Type: application/x-www-form-urlencoded
+	Content-Length: 5
 	
 	hit=1&sink=D
 	
 	
 -----------------------------------------------------------------------
+Valid guess:
+	200 OK
+	Ex: 127.0.0.1 - - [19/Sep/2016 20:19:37] "POST / HTTP/1.1" 200 -
+	
+
 Errors:
-	Out of bounds for firing: HTTP Not Found
-	Already fired upon: HTTP Gone
-	Not formatted correctly: HTTP Bad Request
+	Out of bounds for firing: 404 HTTP Not Found
+	Not formatted correctly: 400 HTTP Bad Request
+	Already fired upon: 410 HTTP Gone
+	Ex: 127.0.0.1 - - [19/Sep/2016 20:19:37] code 410, message Gone
+	
+	
+-----------------------------------------------------------------------
+How to run:
+	python server.py 5000 board.txt
+	python client.py localhost 5000 5 7
+	
+	(where 5 and 7 are your x and y coordinates respectively)

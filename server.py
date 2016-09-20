@@ -22,18 +22,18 @@ destroyer = 2
 
 class MyHandler(BaseHTTPRequestHandler):
 	def do_GET(s):
+		#opponent_board.html
 		if s.path == '/opponent_board.html':
 			s.send_response(200)
 			s.send_header('Content-type', 'text/html')
 			s.end_headers()
 			printmatrixopp = create_HTML(matrixopp)
 			s.wfile.write(("<html><body><table>" + printmatrixopp + "</table></body></html>").encode('utf-8'))
-
+		#own_board.html
 		elif s.path == '/own_board.html':
 			s.send_response(200)
 			s.send_header('Content-type', 'text/html')
 			s.end_headers()
-		
 			printmatrixown = create_HTML(matrixown)
 			s.wfile.write(("<html><body><table>" + printmatrixown +"</table></body></html>").encode('utf-8'))
 
@@ -41,14 +41,16 @@ class MyHandler(BaseHTTPRequestHandler):
 		content_length = int(s.headers['Content-Length'])
 		post_data = s.rfile.read(content_length)
 		data_string = post_data.decode("utf-8")
+
+		#extracting x and y
 		xlist = re.findall('x=(.?)', data_string)
 		ylist = re.findall('y=(.?)', data_string)
-
 		x = int(xlist[0]) 
 		y = int(ylist[0])
 
 		response = evaluate(x, y)
 		
+		#valid
 		if response[0] == '200':
 			write_HTML(x,y)
 			
@@ -64,7 +66,7 @@ class MyHandler(BaseHTTPRequestHandler):
 			s.wfile.write(msg)
 
 		else:
-			s.send_error(int(response))
+			s.send_response(int(response))
 
 def run():
 	port = int(sys.argv[1])
@@ -104,7 +106,7 @@ def evaluate(x, y):
 	#already guessed that location
 	elif(value == "M" or value == "H"):
 		#HTTP Gone
-		return '400'
+		return '410'
 	#hit
 	else:
 		if(value == "C"):
@@ -132,7 +134,6 @@ def evaluate(x, y):
 
 def miss(x, y):
 	#mark the spot as a miss
-	
 	board = get_board()
 	row = list(board[y])	#row with miss
 	row[x] = "M"			#replacing "_" with "M"
@@ -145,7 +146,7 @@ def miss(x, y):
 		text_file.write(line)
 	text_file.close()
 	
-
+	#setting parameters
 	params = urllib.parse.urlencode({'hit': 0})
 	re = '200'
 	header = ('application/x-www-form-urlencoded')
@@ -155,7 +156,6 @@ def miss(x, y):
 
 def hit(x, y, ship):
 	#mark the spot as a hit
-	
 	board = get_board()
 	row = list(board[y])	#row with hit
 	row[x] = "H"			#replacing "_" with "H"
@@ -168,7 +168,7 @@ def hit(x, y, ship):
 		text_file.write(line)
 	text_file.close()
 	
-
+	#configuring resonse
 	re = '200'
 	val = check_for_sunk(ship) 
 	if (val == "E"):
