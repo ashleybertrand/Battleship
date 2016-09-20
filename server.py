@@ -170,8 +170,7 @@ def hit(x, y, ship):
 	'''
 
 	re = '200'
-	val = check_for_sunk(ship)
-	print (val)
+	val = check_for_sunk(ship) 
 	if (val == "E"):
 		header = ('application/x-www-form-urlencoded')
 		length = '5'
