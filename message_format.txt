@@ -5,7 +5,7 @@
 
 Fire:
 	HTTP POST
-	Where the coordinates for 0-indexed
+	Where the coordinates are 0-indexed
 	x=X&y=Y
 	
 	Ex: 
